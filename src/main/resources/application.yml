@@ -1,0 +1,30 @@
+server:
+  port: 9200
+spring:
+  application:
+    name: cql-cds-hooks
+  jackson:
+    default-property-inclusion: non_null
+  zipkin:
+    base-url: http://zipkin:9411
+eureka:
+  instance:
+    hostname: ${spring.application.name}
+    health-check-url-path: /actuator/health
+  client:
+    service-url:
+      defaultZone: http://discovery.edge-service:9102/eureka/
+management:
+  endpoints:
+    web:
+      exposure:
+        include: "*"
+cio:
+  cds:
+    server:
+      uri: "https://recette.phast.fr/resources-server_Atelier/api/FHIR"
+      credential: "YXRlbGllckBwaGFzdC5mcjpBdGVsaWVyXzIwMjE="
+tio:
+  server:
+    uri: "https://recette.phast.fr/resources-server_Atelier/api/FHIR"
+    credential: "YXRlbGllckBwaGFzdC5mcjpBdGVsaWVyXzIwMjE="

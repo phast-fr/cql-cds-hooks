@@ -1,0 +1,23 @@
+{
+  "properties": [
+    {
+      "name": "cio.cds.server.uri",
+      "type": "java.lang.String",
+      "description": "Description for cio.cds.server.uri."
+  },
+    {
+      "name": "cio.cds.server.credential",
+      "type": "java.lang.String",
+      "description": "Description for cio.cds.server.credential."
+    },
+    {
+      "name": "tio.server.uri",
+      "type": "java.lang.String",
+      "description": "Description for tio.server.uri."
+    },
+    {
+      "name": "tio.server.credential",
+      "type": "java.lang.String",
+      "description": "Description for tio.server.credential."
+    }
+] }
