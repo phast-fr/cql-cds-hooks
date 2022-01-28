@@ -58,13 +58,13 @@ open class CdsHooksController(
     private val libraryService: LibraryService
 ): HealthIndicator {
 
-    private val client = RestClient(ciOcdsProperties.uri).also {
-        it.tokenType = "Basic"
-        it.credential = ciOcdsProperties.credential
+    private val client = RestClient(ciOcdsProperties.uri ?: "http://localhost").apply {
+        tokenType = "Basic"
+        credential = ciOcdsProperties.credential
     }
 
     private val libraryResolutionProvider = LibraryResourceProvider(
-        ciOcdsProperties.uri,
+        ciOcdsProperties.uri ?: "http://localhost",
         Library::class.java,
         ciOcdsProperties.credential
     )

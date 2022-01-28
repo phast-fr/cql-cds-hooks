@@ -40,7 +40,6 @@ import org.springframework.cache.caffeine.CaffeineCacheManager
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.context.annotation.Lazy
-import org.springframework.context.annotation.Primary
 import java.time.Duration
 import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.TimeUnit
@@ -58,8 +57,8 @@ open class CQLConfig {
 
     @Bean
     open fun cacheManager(caffeine: Caffeine<Any, Any>): CacheManager {
-        return CaffeineCacheManager().also {
-            it.setCaffeine(caffeine)
+        return CaffeineCacheManager().apply {
+            setCaffeine(caffeine)
         }
     }
 
@@ -88,7 +87,8 @@ open class CQLConfig {
     open fun terminologyProvider(tioProperties: TIOProperties,
                                  globalTerminologyCache: MutableMap<String, Iterable<Code>>): TerminologyProvider {
         return CacheAwareTerminologyDecorator(
-            R4FhirTerminologyProvider(tioProperties.uri, tioProperties.credential), globalTerminologyCache
+            R4FhirTerminologyProvider(tioProperties.uri ?: "http://localhost", tioProperties.credential),
+            globalTerminologyCache
         )
     }
 

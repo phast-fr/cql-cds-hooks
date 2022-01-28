@@ -29,4 +29,4 @@ import org.springframework.boot.context.properties.ConstructorBinding
 
 @ConstructorBinding
 @ConfigurationProperties("cio.cds.server")
-data class CIOcdsProperties(val uri: String, val credential: String?)
+data class CIOcdsProperties(val uri: String?, val credential: String?)

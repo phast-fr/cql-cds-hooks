@@ -29,4 +29,4 @@ import org.springframework.boot.context.properties.ConstructorBinding
 
 @ConstructorBinding
 @ConfigurationProperties("tio.server")
-data class TIOProperties(val uri: String, val credential: String?)
+data class TIOProperties(val uri: String?, val credential: String?)
