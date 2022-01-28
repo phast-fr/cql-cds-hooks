@@ -1,7 +1,7 @@
 # CQL CDS HOOKS
 
 [![MIT License][license-image]][license]
-![build](https://github.com/phast-fr/cql-cds-hooks/actions/workflows/ci.yml/badge.svg)
+![build](https://github.com/phast-fr/cql-cds-hooks/actions/workflows/build.yml/badge.svg)
 
 HL7 CDS HOOKS implementation with CQL (Clinical Quality Language) support.
 
