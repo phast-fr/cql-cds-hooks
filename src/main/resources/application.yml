@@ -19,12 +19,3 @@ management:
     web:
       exposure:
         include: "*"
-cio:
-  cds:
-    server:
-      uri: "https://recette.phast.fr/resources-server_Atelier/api/FHIR"
-      credential: "YXRlbGllckBwaGFzdC5mcjpBdGVsaWVyXzIwMjE="
-tio:
-  server:
-    uri: "https://recette.phast.fr/resources-server_Atelier/api/FHIR"
-    credential: "YXRlbGllckBwaGFzdC5mcjpBdGVsaWVyXzIwMjE="
