@@ -45,7 +45,7 @@ dependencies {
     implementation("org.springframework.boot:spring-boot-starter-cache")
     implementation("com.github.ben-manes.caffeine:caffeine")
 
-    implementation("fr.phast:cql-services:0.0.39-SNAPSHOT")
+    implementation("fr.phast:cql-services:0.0.40-SNAPSHOT")
 }
 
 dependencyManagement {
