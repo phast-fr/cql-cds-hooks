@@ -22,16 +22,17 @@
  * SOFTWARE.
  */
 
-package fr.phast.cql.cdshooks.evaluators
+package fr.phast.cql.cdshooks.evaluators.r4
 
 import fr.phast.cql.cdshooks.builders.r4.*
 import fr.phast.cql.cdshooks.converters.R4CarePlanToCdsCard
+import fr.phast.cql.cdshooks.evaluators.BaseHookEvaluator
 import fr.phast.cql.cdshooks.models.cards.Card
 import fr.phast.cql.engine.fhir.model.R4FhirModelResolver
 import org.hl7.fhir.r4.model.*
 import org.opencds.cqf.cql.engine.execution.Context
 
-class R4HookEvaluator(modelResolver: R4FhirModelResolver): BaseHookEvaluator<PlanDefinition>(modelResolver) {
+class HookEvaluator(modelResolver: R4FhirModelResolver): BaseHookEvaluator<PlanDefinition>(modelResolver) {
 
     override fun evaluateCdsHooksPlanDefinition(
         context: Context,
@@ -78,9 +79,12 @@ class R4HookEvaluator(modelResolver: R4FhirModelResolver): BaseHookEvaluator<Pla
     }
 
     private fun resolveActions(
-        actions: List<PlanDefinitionAction>, context: Context,
-        patientId: String, requestGroupBuilder: RequestGroupBuilder,
-        actionComponents: MutableList<RequestGroupAction>) {
+        actions: List<PlanDefinitionAction>,
+        context: Context,
+        patientId: String,
+        requestGroupBuilder: RequestGroupBuilder,
+        actionComponents: MutableList<RequestGroupAction>
+    ) {
         actions.forEach { action ->
             if (action.condition != null) {
                 action.condition!!.forEach { condition ->
@@ -130,20 +134,22 @@ class R4HookEvaluator(modelResolver: R4FhirModelResolver): BaseHookEvaluator<Pla
                             if (action.selectionBehavior != null) {
                                 actionBuilder.buildSelectionBehavior(action.selectionBehavior!!)
                             }
-                            /*if (action.hasDefinition()) {
-                                if (action.getDefinitionCanonicalType().getValue().contains("ActivityDefinition")) {
+                            var resource: Resource? = null
+                            if (action.definitionCanonical?.value != null) {
+                                if (action.definitionCanonical!!.value.contains("ActivityDefinition")) {
                                     val inParams = Parameters()
-                                    inParams.addParameter().setName("patient").setValue(StringType(patientId))
-                                    val outParams: Parameters = applyClient.operation()
-                                        .onInstance(IdDt(action.getDefinitionCanonicalType().getValue()))
+                                    val patientParameter = ParametersParameter(StringType("patient"))
+                                    patientParameter.valueString = StringType(patientId)
+                                    val parameters = mutableListOf<ParametersParameter>()
+                                    parameters.add(patientParameter)
+                                    inParams.parameter = parameters
+                                    /*val outParams = applyClient.operation()
+                                        .onInstance(IdDt(action.definitionCanonical!!.value))
                                         .named("\$apply").withParameters(inParams).useHttpGet().execute()
-                                    val response: List<Parameters.ParametersParameterComponent>? = outParams.parameter
-                                    val resource: Resource = response!![0].getResource().setId(UUID.randomUUID().toString())
-                                    actionBuilder.buildResourceTarget(resource)
-                                    actionBuilder
-                                        .buildResource(ReferenceBuilder().buildReference(resource.id).build())
+                                    val response = outParams.parameter
+                                    resource = response!![0].resource?.id.setId(UUID.randomUUID().toString())*/
                                 }
-                            }*/
+                            }
 
                             // Dynamic values populate the RequestGroup - there is a bit of hijacking going
                             // on here...
@@ -155,21 +161,45 @@ class R4HookEvaluator(modelResolver: R4FhirModelResolver): BaseHookEvaluator<Pla
                                                 .resolveExpressionRef(dynamicValue.expression?.expression?.value!!)
                                                 .evaluate(context) as String
                                             actionBuilder.buildTitle(StringType(title))
-                                        } else if (dynamicValue.path?.value!!.endsWith("description")) { // detail
+                                        }
+                                        else if (dynamicValue.path?.value!!.endsWith("description")) { // detail
                                             val description = context
                                                 .resolveExpressionRef(dynamicValue.expression?.expression?.value)
                                                 .evaluate(context) as String
                                             actionBuilder.buildDescription(StringType(description))
-                                        } else if (dynamicValue.path?.value!!.endsWith("extension")) { // indicator
+                                        }
+                                        else if (dynamicValue.path?.value!!.endsWith("extension")) { // indicator
                                             val extension = context
                                                 .resolveExpressionRef(dynamicValue.expression?.expression?.value)
                                                 .evaluate(context) as String
                                             actionBuilder.buildExtension(StringType(extension))
                                         }
+                                        else {
+                                            if (resource != null) {
+                                                var value = context.resolveExpressionRef(
+                                                    dynamicValue.expression!!.expression!!.value
+                                                ).evaluate(context)
+
+                                                // TODO need to verify type... yay
+                                                if (value is Boolean) {
+                                                    value = BooleanType(value)
+                                                }
+
+                                                val modelResolver = R4FhirModelResolver()
+                                                modelResolver.setValue(resource, dynamicValue.path!!.value, value)
+
+                                                actionBuilder.buildResourceTarget(resource)
+                                                actionBuilder.buildResource(
+                                                    ReferenceBuilder().buildReference(StringType(resource.id!!.value)).build()
+                                                )
+                                            }
+                                        }
                                     }
                                 }
                             }
+
                             actionComponents.add(actionBuilder.build())
+
                             if (!action.action.isNullOrEmpty()) {
                                 resolveActions(
                                     action.action!!, context, patientId, requestGroupBuilder, actionComponents

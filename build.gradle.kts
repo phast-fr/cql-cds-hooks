@@ -2,13 +2,10 @@ import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 
 plugins {
-    id("org.springframework.boot") version "2.6.3"
-    id("io.spring.dependency-management") version "1.0.11.RELEASE"
-    kotlin("jvm") version "1.6.10"
-    kotlin("plugin.spring") version "1.6.10"
-    id("java-library")
-    id("maven-publish")
-    id("signing")
+    id("org.springframework.boot") version "2.6.11"
+    id("io.spring.dependency-management") version "1.0.13.RELEASE"
+    kotlin("jvm") version "1.6.21"
+    kotlin("plugin.spring") version "1.6.21"
 }
 
 group = "fr.phast"
@@ -22,11 +19,12 @@ configurations {
 }
 
 repositories {
+    mavenLocal()
     mavenCentral()
     maven { url = uri("https://s01.oss.sonatype.org/content/repositories/snapshots") }
 }
 
-extra["springCloudVersion"] = "2021.0.0"
+extra["springCloudVersion"] = "2021.0.3"
 
 dependencies {
     implementation("org.springframework.boot:spring-boot-starter-actuator")
@@ -47,12 +45,7 @@ dependencies {
     implementation("org.springframework.boot:spring-boot-starter-cache")
     implementation("com.github.ben-manes.caffeine:caffeine")
 
-    implementation("info.cqframework:cql-to-elm:1.5.4")
-    implementation("org.opencds.cqf.cql:engine:1.5.2")
-
-    implementation("fr.phast:phast-fhir-kt:0.0.10-SNAPSHOT")
-    implementation("fr.phast:cql-engine-fhir:0.0.13-SNAPSHOT")
-    implementation("fr.phast:cql-services:0.0.17-SNAPSHOT")
+    implementation("fr.phast:cql-services:0.0.39-SNAPSHOT")
 }
 
 dependencyManagement {
@@ -61,7 +54,6 @@ dependencyManagement {
                 "${property("springCloudVersion")}")
     }
 }
-
 
 tasks.withType<KotlinCompile> {
     kotlinOptions {

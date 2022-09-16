@@ -26,7 +26,7 @@ package fr.phast.cql.cdshooks.controllers
 
 import fr.phast.cql.cdshooks.configurations.CIOcdsProperties
 import fr.phast.cql.cdshooks.evaluations.R4EvaluationContext
-import fr.phast.cql.cdshooks.evaluators.R4HookEvaluator
+import fr.phast.cql.cdshooks.evaluators.r4.HookEvaluator
 import fr.phast.cql.cdshooks.models.cards.Card
 import fr.phast.cql.cdshooks.models.cards.CdsResponse
 import fr.phast.cql.cdshooks.models.cards.IndicatorCode
@@ -52,7 +52,7 @@ import java.util.concurrent.atomic.AtomicBoolean
 import javax.servlet.ServletException
 
 @RestController
-open class CdsHooksController(
+class CdsHooksController(
     ciOcdsProperties: CIOcdsProperties,
     private val terminologyProvider: TerminologyProvider,
     private val libraryService: LibraryService
@@ -74,7 +74,7 @@ open class CdsHooksController(
     }
 
     @GetMapping("/cds-services")
-    open fun doGetCdsServices(): Services {
+    fun doGetCdsServices(): Services {
         return getCdsServices()
     }
 
@@ -131,7 +131,7 @@ open class CdsHooksController(
                 modelResolver
             )
             return CdsResponse(
-                R4HookEvaluator(
+                HookEvaluator(
                     modelResolver
                 ).evaluate(
                     evaluationContext

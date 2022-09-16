@@ -1,4 +1,4 @@
-FROM eclipse-temurin:11.0.13_8-jre-alpine
+FROM eclipse-temurin:11.0.16_8-jre-alpine
 
 MAINTAINER David Ouagne <david.ouagne@phast.fr>
 

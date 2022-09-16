@@ -64,10 +64,10 @@ class RequestGroupActionBuilder: BaseBuilder<RequestGroupAction>(RequestGroupAct
         return this
     }
 
-    /*fun buildResourceTarget(resource: Resource): RequestGroupActionBuilder {
-        complexProperty..setResourceTarget(resource)
+    fun buildResourceTarget(resource: Resource): RequestGroupActionBuilder {
+        complexProperty.resourceTarget = resource
         return this
-    }*/
+    }
 
     fun buildExtension(extension: StringType): RequestGroupActionBuilder {
         complexProperty.extension = listOf(

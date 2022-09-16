@@ -35,7 +35,9 @@ import org.opencds.cqf.cql.engine.data.CompositeDataProvider
 import org.opencds.cqf.cql.engine.execution.Context
 import org.opencds.cqf.cql.engine.model.ModelResolver
 
-abstract class BaseHookEvaluator<R: Resource>(protected val modelResolver: ModelResolver) {
+abstract class BaseHookEvaluator<R: Resource>(
+    protected val modelResolver: ModelResolver
+    ) {
 
     fun evaluate(context: EvaluationContext<R>): List<Card> {
         // resolve context resources parameter
