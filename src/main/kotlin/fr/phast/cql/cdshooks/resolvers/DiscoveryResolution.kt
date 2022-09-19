@@ -140,14 +140,42 @@ class DiscoveryResolution(private val client: RestClient) {
         return lCodes
     }
 
-    fun createRequestUrl(dataRequirement: DataRequirement): List<String> {
-        val ret = mutableListOf<String>()
+    fun createRequestUrl(dataRequirement: DataRequirement): String? {
         if (!isPatientCompartment(dataRequirement.type.value)) {
-            return ret
+            return null
         }
-        val patientRelatedResource =
-            "${dataRequirement.type.value}?${getPatientSearchParam(dataRequirement.type.value)}=Patient/$PATIENT_ID_CONTEXT"
-        return if (dataRequirement.codeFilter != null) {
+        val sb = StringBuilder()
+        sb.append("${dataRequirement.type.value}?${getPatientSearchParam(dataRequirement.type.value)}=Patient/$PATIENT_ID_CONTEXT")
+
+        if (dataRequirement.codeFilter != null) {
+            dataRequirement.codeFilter!!.forEach { dataRequirementCodeFilter ->
+                if (dataRequirementCodeFilter.path != null) {
+                    val path = mapCodePathToSearchParam(dataRequirement.type.value, dataRequirementCodeFilter.path!!.value)
+                    if (dataRequirementCodeFilter.valueSet != null) {
+                        resolveValueSetCodes(dataRequirementCodeFilter.valueSet!!).forEach { codes ->
+                            sb.append("&$path=$codes")
+                        }
+                    }
+                    else if (dataRequirementCodeFilter.code != null) {
+                        val codeFilterValueCodings = dataRequirementCodeFilter.code
+                        if (codeFilterValueCodings != null) {
+                            var isFirstCodingInFilter = true
+                            resolveValueCodingCodes(codeFilterValueCodings).forEach { code ->
+                                if (isFirstCodingInFilter) {
+                                    sb.append("&$path=$code")
+                                } else {
+                                    sb.append(",$code")
+                                }
+                                isFirstCodingInFilter = false
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        return sb.toString()
+
+        /*return if (dataRequirement.codeFilter != null) {
             dataRequirement.codeFilter?.forEach { codeFilterComponent ->
                 if (codeFilterComponent.path != null) {
                     val path = mapCodePathToSearchParam(dataRequirement.type.value, codeFilterComponent.path!!.value)
@@ -177,28 +205,28 @@ class DiscoveryResolution(private val client: RestClient) {
         else {
             ret.add(patientRelatedResource)
             ret
-        }
+        }*/
     }
 
-    private fun getPrefetchUrlList(planDefinition: PlanDefinition): PrefetchUrlList {
-        val prefetchList = PrefetchUrlList()
+    private fun getPrefetchUrlList(planDefinition: PlanDefinition): List<String> {
+        val prefetchList = mutableListOf<String?>()
         val library = resolvePrimaryLibrary(planDefinition)
 
         if (!isEca(planDefinition)) {
-            return prefetchList
+            return prefetchList.filterNotNull()
         }
 
         library?.let {
             // TODO: resolve data requirements
             if (library.dataRequirement == null) {
-                return prefetchList
+                return prefetchList.filterNotNull()
             }
 
             library.dataRequirement?.forEach { requirement ->
-                prefetchList.addAll(createRequestUrl(requirement))
+                prefetchList.add(createRequestUrl(requirement))
             }
         }
-        return prefetchList
+        return prefetchList.filterNotNull()
     }
 
     fun resolve(): Services {
