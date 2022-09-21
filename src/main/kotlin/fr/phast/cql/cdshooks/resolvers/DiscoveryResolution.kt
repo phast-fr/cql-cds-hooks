@@ -278,14 +278,90 @@ class DiscoveryResolution(private val client: RestClient) {
     }
 
     private fun mapCodePathToSearchParam(dataType: String, path: String): String {
-        when (dataType) {
-            "MedicationAdministration" -> if (path == "medication") return "code"
-            "MedicationDispense" -> if (path == "medication") return "code"
-            "MedicationRequest" -> if (path == "medication") return "code"
-            "MedicationStatement" -> if (path == "medication") return "code"
-            else -> if (path == "vaccineCode") return "vaccine-code"
+        return when (dataType) {
+            "Condition" -> return when (path) {
+                "abatement.as(Age)" -> "abatement-age"
+                "abatement.as(Range)" -> "abatement-age"
+                "abatement.as(dateTime)" -> "abatement-date"
+                "abatement.as(Period)" -> "abatement-date"
+                "abatement.as(string)" -> "abatement-string"
+                "bodySite" -> "body-site"
+                "clinicalStatus" -> "clinical-status"
+                "evidence.code" -> "evidence"
+                "evidence.detail" -> "evidence-detail"
+                "onset.as(Age)" -> "onset-age"
+                "onset.as(Range)" -> "onset-age"
+                "onset.as(dateTime)" -> "onset-date"
+                "onset.as(Period)" -> "onset-date"
+                "onset.as(string)" -> "onset-info"
+                "subject.where(resolve() is Patient)" -> "patient"
+                "recordedDate" -> "recorded-date"
+                "stage.summary" -> "stage"
+                "verificationStatus" -> "verification-status"
+                else -> path
+            }
+            "Observation" -> return when (path) {
+                "basedOn" -> "based-on"
+                "dataAbsentReason" -> "data-absent-reason"
+                "effective" -> "date"
+                "derivedFrom" -> "derived-from"
+                "hasMember" -> "has-member"
+                "partOf" -> "part-of"
+                "subject.where(resolve() is Patient)" -> "patient"
+                "value.as(CodeableConcept)" -> "value-concept"
+                "value.as(dateTime)" -> "value-date"
+                "value.as(Period)" -> "value-date"
+                "value.as(Quantity)" -> "value-quantity"
+                "value.as(SampledData)" -> "value-quantity"
+                "value.as(string)" -> "value-string"
+                "value.as(CodeableConcept).text" -> "value-string"
+                else -> path
+            }
+            "AllergyIntolerance" -> return when (path) {
+                "clinicalStatus" -> "clinical-status"
+                "reaction.substance" -> "code"
+                "recordedDate" -> "date"
+                "lastOccurrence" -> "last-date"
+                "reaction.manifestation" -> "manifestation"
+                "reaction.onset" -> "onset"
+                "reaction.exposureRoute" -> "route"
+                "reaction.severity" -> "severity"
+                "verificationStatus" -> "verification-status"
+                else -> path
+            }
+            "MedicationRequest" -> return when (path) {
+                "authoredOn" -> "authoredon"
+                "medication.as(CodeableConcept)" -> "code"
+                "dosageInstruction.timing.event" -> "date"
+                "dispenseRequest.performer" -> "intended-dispenser"
+                "performer" -> "intended-performer"
+                "performerType" -> "intended-performertype"
+                "medication.as(Reference)" -> "medication"
+                "subject.where(resolve() is Patient)" -> "patient"
+                else -> path
+            }
+            "MedicationStatement" -> return when (path) {
+                "medication.as(CodeableConcept)" -> "code"
+                "medication.as(Reference)" -> "medication"
+                "partOf" -> "part-of"
+                "subject.where(resolve() is Patient)" -> "patient"
+                "informationSource" -> "source"
+                else -> path
+            }
+            "Procedure" -> return when (path) {
+                "basedOn" -> "based-on"
+                "performed" -> "date"
+                "instantiatesCanonical" -> "instantiates-canonical"
+                "instantiatesUri" -> "instantiates-uri"
+                "partOf" -> "part-of"
+                "subject.where(resolve() is Patient)" -> "patient"
+                "performer.actor" -> "performer"
+                "reasonCode" -> "reason-code"
+                "reasonReference" -> "reason-reference"
+                else -> path
+            }
+            else -> path
         }
-        return path.replace('.', '-').lowercase()
     }
 
     fun isPatientCompartment(dataType: String?): Boolean {
