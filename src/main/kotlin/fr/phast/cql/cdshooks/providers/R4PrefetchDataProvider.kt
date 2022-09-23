@@ -81,9 +81,11 @@ class R4PrefetchDataProvider(resources: List<Resource>, private val resolver: Mo
                     codesLoc = terminologyProvider.expand(valueSetInfo)
                 }
                 if (codesLoc != null) {
-                    val codeObject = PrefetchDataProviderHelper
-                        .getR4Code(resolver.resolvePath(resource, codePath))
-                    includeResource = PrefetchDataProviderHelper.checkCodeMembership(codesLoc, codeObject)
+                    val value = resolver.resolvePath(resource, codePath)
+                    if (value != null) {
+                        val codeObject = PrefetchDataProviderHelper.getR4Code(value)
+                        includeResource = PrefetchDataProviderHelper.checkCodeMembership(codesLoc, codeObject)
+                    }
                 }
             }
 
