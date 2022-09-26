@@ -24,7 +24,6 @@
 
 package fr.phast.cql.cdshooks.configurations
 
-import com.github.benmanes.caffeine.cache.Caffeine
 import fr.phast.cql.engine.fhir.terminology.R4FhirTerminologyProvider
 import fr.phast.cql.services.LibraryService
 import fr.phast.cql.services.decorators.CacheAwareTerminologyDecorator
@@ -35,57 +34,17 @@ import org.cqframework.cql.elm.execution.Library
 import org.cqframework.cql.elm.execution.VersionedIdentifier
 import org.opencds.cqf.cql.engine.runtime.Code
 import org.opencds.cqf.cql.engine.terminology.TerminologyProvider
-import org.springframework.cache.CacheManager
-import org.springframework.cache.caffeine.CaffeineCacheManager
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.context.annotation.Lazy
-import java.time.Duration
-import java.util.concurrent.ConcurrentHashMap
-import java.util.concurrent.TimeUnit
-
 
 @Configuration
-open class CQLConfig {
-
-    @Bean
-    open fun caffeineConfig(): Caffeine<Any, Any> {
-        return Caffeine
-            .newBuilder()
-            .expireAfterWrite(60, TimeUnit.MINUTES)
-    }
-
-    @Bean
-    open fun cacheManager(caffeine: Caffeine<Any, Any>): CacheManager {
-        return CaffeineCacheManager().apply {
-            setCaffeine(caffeine)
-        }
-    }
-
-    @Bean(name = ["globalModelCache"])
-    open fun globalModelCache(): MutableMap<org.hl7.elm.r1.VersionedIdentifier, Model> {
-        return ConcurrentHashMap()
-    }
-
-    @Bean(name = ["globalLibraryCache"])
-    open fun globalLibraryCache(): MutableMap<VersionedIdentifier, Library> {
-        return ConcurrentHashMap()
-    }
-
-    @Bean(name = ["globalTerminologyCache"])
-    open fun terminologyCache(): Map<String, Iterable<Code>> {
-        val cache = Caffeine
-            .newBuilder()
-            .maximumSize(100)
-            .expireAfterAccess(Duration.ofMinutes(60))
-            .build<String, Iterable<Code>>()
-        return cache.asMap()
-    }
+class CQLConfig {
 
     @Lazy
     @Bean
-    open fun terminologyProvider(tioProperties: TIOProperties,
-                                 globalTerminologyCache: MutableMap<String, Iterable<Code>>): TerminologyProvider {
+    fun terminologyProvider(tioProperties: TIOProperties,
+                            globalTerminologyCache: MutableMap<String, Iterable<Code>>): TerminologyProvider {
         return CacheAwareTerminologyDecorator(
             R4FhirTerminologyProvider(tioProperties.uri ?: "http://localhost", tioProperties.credential),
             globalTerminologyCache
@@ -94,7 +53,7 @@ open class CQLConfig {
 
     @Lazy
     @Bean
-    open fun libraryService(
+    fun libraryService(
         globalModelCache: MutableMap<org.hl7.elm.r1.VersionedIdentifier, Model>,
         globalLibraryCache: MutableMap<VersionedIdentifier, Library>,
         cqlTranslatorOptions: CqlTranslatorOptions
@@ -104,7 +63,7 @@ open class CQLConfig {
 
     @Lazy
     @Bean
-    open fun cqlTranslatorOptions(): CqlTranslatorOptions {
+    fun cqlTranslatorOptions(): CqlTranslatorOptions {
         return CqlTranslatorOptions(
             CqlTranslator.Options.EnableAnnotations,
             CqlTranslator.Options.EnableLocators,

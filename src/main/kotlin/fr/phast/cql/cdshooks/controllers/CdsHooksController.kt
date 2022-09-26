@@ -47,6 +47,7 @@ import org.opencds.cqf.cql.engine.terminology.TerminologyProvider
 import org.slf4j.LoggerFactory
 import org.springframework.boot.actuate.health.Health
 import org.springframework.boot.actuate.health.HealthIndicator
+import org.springframework.cache.annotation.Cacheable
 import org.springframework.web.bind.annotation.*
 import java.util.concurrent.atomic.AtomicBoolean
 import javax.servlet.ServletException
@@ -73,6 +74,7 @@ class CdsHooksController(
         return Health.up().build()
     }
 
+    @Cacheable("cds-services")
     @GetMapping("/cds-services")
     fun doGetCdsServices(): Services {
         return getCdsServices()
