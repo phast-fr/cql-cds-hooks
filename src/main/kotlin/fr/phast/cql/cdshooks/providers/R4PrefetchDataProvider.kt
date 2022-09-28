@@ -67,10 +67,9 @@ class R4PrefetchDataProvider(resources: List<Resource>, private val resolver: Mo
         }
 
         val returnList = mutableListOf<Any>()
+        var includeResource = true
         resourcesOfType.forEach { resource ->
-            var includeResource = true
-
-            if (codePath != null && codePath != "" && includeResource) {
+            if (codePath != null && codePath != "") {
                 var codesLoc = codes
                 if (valueSet != null && terminologyProvider != null) {
                     var valueSetLoc = valueSet
@@ -85,6 +84,9 @@ class R4PrefetchDataProvider(resources: List<Resource>, private val resolver: Mo
                     if (value != null) {
                         val codeObject = PrefetchDataProviderHelper.getR4Code(value)
                         includeResource = PrefetchDataProviderHelper.checkCodeMembership(codesLoc, codeObject)
+                    }
+                    else {
+                        includeResource = false
                     }
                 }
             }

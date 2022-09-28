@@ -91,12 +91,12 @@ class HookEvaluator(modelResolver: R4FhirModelResolver): BaseHookEvaluator<PlanD
                     if (condition.kind === ActionConditionKind.APPLICABILITY) {
                         val conditionsMet = if (condition.expression?.expression?.value != null) {
                             context.resolveExpressionRef(condition.expression!!.expression?.value)
-                                .expression.evaluate(context) as Boolean
+                                .expression.evaluate(context) as Boolean?
                         }
                         else {
                             false
                         }
-                        if (conditionsMet) {
+                        if (conditionsMet == true) {
                             val actionBuilder = RequestGroupActionBuilder()
                             if (action.title?.value != null) {
                                 actionBuilder.buildTitle(action.title!!)
