@@ -76,21 +76,25 @@ object PrefetchDataProviderHelper {
     fun getR4Code(codeObject: Any): Any {
         return when (codeObject) {
             is CodeType -> codeObject.value
-            is Coding -> Code().withSystem(codeObject.system?.value)
+            is Coding -> Code()
+                .withSystem(codeObject.system?.value)
                 .withCode(codeObject.code?.value)
             is CodeableConcept -> {
-                val codes = mutableListOf<Code>()
-                codeObject.coding?.forEach { coding ->
-                    codes.add(getR4Code(coding) as Code)
+                if (codeObject.coding != null) {
+                    codeObject.coding!!.map { coding ->
+                        getR4Code(coding) as Code
+                    }
                 }
-                codes
+                else {
+                    listOf()
+                }
             }
             is Medication -> {
                 if (codeObject.code != null) {
                     getR4Code(codeObject.code!!)
                 }
                 else {
-                    codeObject
+                    listOf<Code>()
                 }
             }
             else -> codeObject
@@ -101,8 +105,8 @@ object PrefetchDataProviderHelper {
         if (codeObject != null) {
             val qualifyingCodes = getElmCodesFromObject(codeObject)
             if (qualifyingCodes.isNotEmpty()) {
-                for (qualifyingCode in qualifyingCodes) {
-                    for (code in codes) {
+                qualifyingCodes.forEach { qualifyingCode ->
+                    codes.forEach { code ->
                         if (qualifyingCode.system == null ||
                             qualifyingCode.system == code.system && qualifyingCode.code != null
                             && qualifyingCode.code == code.code) {
@@ -115,58 +119,56 @@ object PrefetchDataProviderHelper {
         return false
     }
 
-    private fun getElmCodesFromObject(`object`: Any): List<Code> {
+    private fun getElmCodesFromObject(myObject: Any): List<Code> {
         val codes = mutableListOf<Code>()
-        if (`object` is Iterable<*>) {
-            for (innerObject in `object`) {
-                val elmCodes = getElmCodesFromObject(
-                    innerObject!!
+        if (myObject is Iterable<*>) {
+            myObject.forEach { innerObject ->
+                codes.addAll(
+                    getElmCodesFromObject(
+                        innerObject!!
+                    )
                 )
-                codes.addAll(elmCodes)
             }
         }
         else {
-            val elmCodes = getElmCodesFromObjectInner(`object`)
-            codes.addAll(elmCodes)
+            codes.addAll(getElmCodesFromObjectInner(myObject))
         }
         return codes
     }
 
-    private fun getElmCodesFromObjectInner(`object`: Any?): List<Code> {
+    private fun getElmCodesFromObjectInner(myObject: Any?): List<Code> {
         val codes = mutableListOf<Code>()
-        if (`object` == null) {
+        if (myObject == null) {
             return codes
         }
 
-        when (`object`) {
+        when (myObject) {
             is CodeableConcept -> {
-                val codesFromObject = this.getCodesInConcept(`object`)
+                val codesFromObject = this.getCodesInConcept(myObject)
                 if (codesFromObject != null) {
                     codes.addAll(codesFromObject)
                 }
             }
-            is Coding -> codes.addAll(generateCodes(listOf(`object`)))
-            is Code -> codes.add(`object`)
+            is Coding -> codes.addAll(generateCodes(listOf(myObject)))
+            is Code -> codes.add(myObject)
             else -> throw IllegalArgumentException(
-                String.format("Unable to extract codes from object %s", `object`.toString())
+                String.format("Unable to extract codes from object %s", myObject.toString())
             )
         }
         return codes
     }
 
-    private fun getCodesInConcept(`object`: CodeableConcept): List<Code>? {
-        return `object`.coding?.let { generateCodes(it) }
+    private fun getCodesInConcept(myObject: CodeableConcept): List<Code>? {
+        return myObject.coding?.let { generateCodes(it) }
     }
 
     private fun generateCodes(codingObjects: List<Coding>): List<Code> {
-        val codes = mutableListOf<Code>()
-        codingObjects.forEach { coding ->
-            codes.add(Code()
+        return codingObjects.map { coding ->
+            Code()
                 .withSystem(coding.system?.value)
                 .withCode(coding.code?.value)
                 .withDisplay(coding.display?.value)
-                .withVersion(coding.version?.value))
+                .withVersion(coding.version?.value)
         }
-        return codes
     }
 }

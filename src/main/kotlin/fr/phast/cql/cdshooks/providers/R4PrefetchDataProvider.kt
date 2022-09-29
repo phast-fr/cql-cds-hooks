@@ -54,7 +54,7 @@ class R4PrefetchDataProvider(resources: List<Resource>, private val resolver: Mo
         requireNotNull(dataType) { "A data type (i.e. Procedure, Valueset, etc...) must be specified for clinical data retrieval" }
 
         // This dataType can't be related to patient, therefore may
-        // not be in the pre-fetch bundle, or might required a lookup by Id
+        // not be in the pre-fetch bundle, or might require a lookup by ID
         if (context == "Patient" && contextPath == null) {
             return null
         }
@@ -67,9 +67,9 @@ class R4PrefetchDataProvider(resources: List<Resource>, private val resolver: Mo
         }
 
         val returnList = mutableListOf<Any>()
-        var includeResource = true
+        var includeResource: Boolean
         resourcesOfType.forEach { resource ->
-            if (codePath != null && codePath != "") {
+            includeResource = if (codePath != null && codePath != "") {
                 var codesLoc = codes
                 if (valueSet != null && terminologyProvider != null) {
                     var valueSetLoc = valueSet
@@ -83,12 +83,18 @@ class R4PrefetchDataProvider(resources: List<Resource>, private val resolver: Mo
                     val value = resolver.resolvePath(resource, codePath)
                     if (value != null) {
                         val codeObject = PrefetchDataProviderHelper.getR4Code(value)
-                        includeResource = PrefetchDataProviderHelper.checkCodeMembership(codesLoc, codeObject)
+                        PrefetchDataProviderHelper.checkCodeMembership(codesLoc, codeObject)
                     }
                     else {
-                        includeResource = false
+                        false
                     }
                 }
+                else {
+                    false
+                }
+            }
+            else {
+                false
             }
 
             if (includeResource) {
